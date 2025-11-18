@@ -1,0 +1,2 @@
+# 使用英文键名格式
+source=D:\work\RiderProjects\butter-knife-win\Publish
