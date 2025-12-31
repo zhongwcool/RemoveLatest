@@ -6,7 +6,9 @@
 
 - 🔍 **自动识别最新版本**：根据文件名中的版本号自动识别每个渠道子目录中的最新版本文件
 - 📁 **多渠道支持**：自动遍历工作目录下的所有渠道子目录
-- 🎯 **版本号解析**：支持文件名格式如 `Neptune_2025.1.1.exe` 或 `Mars_2025.1.1.exe`
+- 🎯 **版本号解析**：支持3段和4段版本号格式
+  - 3段格式：`Neptune_2025.1.3.exe`（构建号视为0）
+  - 4段格式：`Neptune_2025.1.3.1230.exe`（包含构建号）
 - 💬 **交互式确认**：逐个显示最新版本文件，等待用户确认是否删除
 - ⌨️ **快捷键操作**：回车键删除，ESC键跳过
 - 📊 **详细信息显示**：显示渠道、文件名、版本号、文件大小和完整路径
@@ -38,16 +40,27 @@ source=D:\work\RiderProjects\butter-knife-win\Publish
 
 程序支持以下文件名格式：
 
-- `Neptune_2025.1.1.exe` - 版本号格式：`_YYYY.M.M.exe`
+**3段版本号格式：**
+- `Neptune_2025.1.3.exe` - 版本号格式：`_YYYY.M.M.exe`
 - `Mars_2025.0.8.exe` - 版本号格式：`_YYYY.M.M.exe`
+
+**4段版本号格式：**
+- `Neptune_2025.1.3.1230.exe` - 版本号格式：`_YYYY.M.M.B.exe`
+- `Mars_2025.1.3.456.exe` - 版本号格式：`_YYYY.M.M.B.exe`
+
+**其他：**
 - `ButterKnife.exe` - 无版本号的文件会被忽略
 
-版本号格式说明：
+**版本号格式说明：**
 - `YYYY`: 年份（4位数字）
 - `M`: 主版本号
 - `M`: 次版本号
+- `B`: 构建号（可选，4段格式时使用）
 
-程序会比较版本号，找出每个渠道中版本号最大的文件。
+**版本号比较规则：**
+- 3段版本号（如 `2025.1.3`）会被视为 `2025.1.3.0`
+- 程序会比较完整版本号（包括构建号），找出每个渠道中版本号最大的文件
+- 例如：`xxx_2025.1.3.exe` 和 `xxx_2025.1.3.1230.exe` 对比时，后者会被识别为更新版本
 
 ### 4. 运行程序
 
@@ -76,16 +89,32 @@ python main.py
 
 ### 6. 示例输出
 
+**示例1：3段版本号**
 ```
 工作目录: D:\work\RiderProjects\butter-knife-win\Publish
 
 找到以下最新版本文件：
 
 渠道: wxg
-文件: Mars_2025.1.1.exe
-版本: 2025.1.1
+文件: Mars_2025.1.3.exe
+版本: 2025.1.3
 大小: 39.96 MB
-路径: D:\work\RiderProjects\butter-knife-win\Publish\wxg\Mars_2025.1.1.exe
+路径: D:\work\RiderProjects\butter-knife-win\Publish\wxg\Mars_2025.1.3.exe
+
+是否删除？[回车=删除, ESC=跳过]
+```
+
+**示例2：4段版本号**
+```
+工作目录: D:\work\RiderProjects\butter-knife-win\Publish
+
+找到以下最新版本文件：
+
+渠道: zhk
+文件: Neptune_2025.1.3.1230.exe
+版本: 2025.1.3.1230
+大小: 42.15 MB
+路径: D:\work\RiderProjects\butter-knife-win\Publish\zhk\Neptune_2025.1.3.1230.exe
 
 是否删除？[回车=删除, ESC=跳过]
 ```
@@ -108,8 +137,9 @@ pyinstaller --onefile --version-file version.txt --name RemoveLatest --icon app.
 
 - ⚠️ **删除操作不可恢复**：删除的文件无法恢复，请谨慎操作
 - 📝 **配置文件格式**：确保 `removelatest.txt` 中的 `source=` 配置正确
-- 🔍 **版本号识别**：只有符合 `_YYYY.M.M.exe` 格式的文件才会被识别为版本文件
+- 🔍 **版本号识别**：只有符合 `_YYYY.M.M.exe` 或 `_YYYY.M.M.B.exe` 格式的文件才会被识别为版本文件
 - 📁 **目录结构**：程序会自动识别工作目录下的所有子目录作为渠道
+- 🔢 **版本号处理**：3段版本号会被自动视为构建号为0的4段版本号进行比较
 
 ## 错误处理
 

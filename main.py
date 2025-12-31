@@ -15,16 +15,33 @@ def read_work_directory() -> str:
     raise ValueError("未找到工作目录配置（source=）")
 
 
-def parse_version(filename: str) -> Optional[Tuple[int, int, int]]:
-    """从文件名中解析版本号，返回 (年, 主版本, 次版本) 或 None"""
-    # 匹配格式：Neptune_2025.1.1.exe 或 Mars_2025.1.1.exe
-    pattern = r'_(\d{4})\.(\d+)\.(\d+)\.exe$'
-    match = re.search(pattern, filename)
+def parse_version(filename: str) -> Optional[Tuple[int, int, int, int]]:
+    """从文件名中解析版本号，返回 (年, 主版本, 次版本, 构建号) 或 None
+    
+    支持格式：
+    - xxx_2025.1.3.exe -> (2025, 1, 3, 0)
+    - xxx_2025.1.3.1230.exe -> (2025, 1, 3, 1230)
+    """
+    # 先尝试匹配4段版本号：xxx_2025.1.3.1230.exe
+    pattern_4 = r'_(\d{4})\.(\d+)\.(\d+)\.(\d+)\.exe$'
+    match = re.search(pattern_4, filename)
     if match:
         year = int(match.group(1))
         major = int(match.group(2))
         minor = int(match.group(3))
-        return (year, major, minor)
+        build = int(match.group(4))
+        return (year, major, minor, build)
+    
+    # 再尝试匹配3段版本号：xxx_2025.1.3.exe，将构建号视为0
+    pattern_3 = r'_(\d{4})\.(\d+)\.(\d+)\.exe$'
+    match = re.search(pattern_3, filename)
+    if match:
+        year = int(match.group(1))
+        major = int(match.group(2))
+        minor = int(match.group(3))
+        build = 0  # 3段版本号时，构建号默认为0
+        return (year, major, minor, build)
+    
     return None
 
 
@@ -104,7 +121,11 @@ def main():
             size_mb = get_file_size_mb(file_path)
             print(f"渠道: {channel}")
             print(f"文件: {file_path.name}")
-            print(f"版本: {version[0]}.{version[1]}.{version[2]}")
+            # 显示版本号，如果是构建号为0则只显示3段
+            if version[3] == 0:
+                print(f"版本: {version[0]}.{version[1]}.{version[2]}")
+            else:
+                print(f"版本: {version[0]}.{version[1]}.{version[2]}.{version[3]}")
             print(f"大小: {size_mb:.2f} MB")
             print(f"路径: {file_path}")
             print("\n是否删除？[回车=删除, ESC=跳过]")
